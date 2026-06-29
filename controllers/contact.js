@@ -1,4 +1,4 @@
-const Contact = require('../models/Contact');
+const Contact = require("../models/Contact");
 
 exports.createContact = async (req, res) => {
   try {
@@ -7,28 +7,28 @@ exports.createContact = async (req, res) => {
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: "All fields are required",
       });
     }
 
     const newContact = new Contact({
       name,
       email,
-      message
+      message,
     });
 
     await newContact.save();
 
     res.status(201).json({
       success: true,
-      message: 'Message saved successfully',
-      data: newContact
+      message: "Message saved successfully",
+      data: newContact,
     });
   } catch (error) {
-    console.error('Error saving contact:', error);
+    console.error("Error saving contact:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error'
+      message: "Server error",
     });
   }
 };

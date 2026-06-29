@@ -1,32 +1,33 @@
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
 
-// Make sure uploads folder exists
-const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
+// 1. Define where and how to store the file
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    cb(null, "uploads/"); // Make sure this folder exists in your project root
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // Standard practice: timestamp + original name to avoid duplicates
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
+// 2. Filter to only allow images
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|webp/;
-  const isValidMime = allowedTypes.test(file.mimetype);
-  const isValidExt = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  if (isValidMime && isValidExt) return cb(null, true);
-  cb(new Error("Only image files are allowed"));
+  const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error("Invalid file type. Only JPEG, PNG and WebP are allowed."),
+      false,
+    );
+  }
 };
 
-// 5 MB limit
+// 3. Export the middleware
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: fileFilter,
 });
 
