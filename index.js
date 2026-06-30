@@ -20,14 +20,27 @@ connectDB();
 // Middleware
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:3000",
   "https://hotel-booking-client-chi.vercel.app",
   process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
-app.use(cors({
-  origin: allowedOrigins,
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true,
-}));
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -44,6 +57,6 @@ app.use("/api/staff", staffRouter);
 app.use("/api/admin", adminRouter);
 
 // Start server
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });
